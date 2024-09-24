@@ -16,14 +16,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QLineEdit,
-    QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
-    QWidget)
+                               QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
+                               QWidget, QDialog)
 from sqlalchemy import create_engine, text
 
 from settings import DB_PATH
 
-
+from ui_compiled import customer_add_ui
 class Ui_Form(object):
+    def open_customers_add(self):  # opens hyety nesysvetnyu
+        self.window = QDialog()
+        self.ui = customer_add_ui.Ui_Form()
+        self.ui.setupUi(self.window)
+        self.window.show()
     def fill_customers_table(self):
         TABLE_ROW_LIMIT = 10
         db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
@@ -40,7 +45,7 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(724, 507)
-        self.addPushButton = QPushButton(Form)
+        self.addPushButton = QPushButton(Form, clicked = lambda:self.open_customers_add())
         self.addPushButton.setObjectName(u"addPushButton")
         self.addPushButton.setGeometry(QRect(40, 420, 111, 61))
         self.tableWidget = QTableWidget(Form)

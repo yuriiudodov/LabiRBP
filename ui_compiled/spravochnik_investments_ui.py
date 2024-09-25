@@ -23,7 +23,7 @@ from sqlalchemy import create_engine, text
 
 from settings import DB_PATH
 from ui_compiled import investment_add, investment_edit
-
+import docx
 
 
 class Ui_Form(object):
@@ -116,6 +116,41 @@ class Ui_Form(object):
         self.ui.setupUi(self.window)
         self.window.show()
 
+    def print_document(self):
+        import docx
+        import pandas as pd
+
+        # i am not sure how you are getting your data, but you said it is a
+        # pandas data frame
+        db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
+
+        df = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
+                                          f'investments.paper_pk,investments.customer_pk, investments.kotirovka, investments.buy_date,investments.sell_date '
+                                          f'FROM investments '
+                                          f'JOIN customers on customers.pk=investments.customer_pk '
+                                          f'JOIN papers on papers.pk=investments.paper_pk'), db_connection).astype(str)
+
+        # open an existing document
+        doc = docx.Document()
+        doc.save('test.docx')
+        doc.add_paragraph("Отчёт о скуфах"
+                          "")
+
+        # add a table to the end and create a reference variable
+        # extra row is so we can add the header row
+        t = doc.add_table(df.shape[0] + 1, df.shape[1])
+
+        # add the header rows.
+        for j in range(df.shape[-1]):
+            t.cell(0, j).text = df.columns[j]
+
+        # add the rest of the data frame
+        for i in range(df.shape[0]):
+            for j in range(df.shape[-1]):
+                t.cell(i + 1, j).text = str(df.values[i, j])
+
+        # save the doc
+        doc.save('C:/MHAD/your_doc_name11.docx')
     @Slot()
     def fill_investments_table(self):
         TABLE_ROW_LIMIT = 10
@@ -171,6 +206,11 @@ class Ui_Form(object):
         self.searchLineEdit = QLineEdit(Form)
         self.searchLineEdit.setObjectName(u"searchLineEdit")
         self.searchLineEdit.setGeometry(QRect(40, 70, 251, 21))
+
+        self.documentPushButton = QPushButton(Form, clicked = lambda:self.print_document())
+        self.documentPushButton.setObjectName(u"documentPushButton")
+        self.documentPushButton.setGeometry(QRect(310, 420, 141, 61))
+        self.documentPushButton.setText("Выпуск документа")
 
         self.retranslateUi(Form)
 

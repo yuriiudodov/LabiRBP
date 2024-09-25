@@ -27,12 +27,12 @@ from ui_compiled import investment_add, investment_edit
 
 
 class Ui_Form(object):
-    data_for_table_global=0
+    data_for_table_global=pd.DataFrame()
     def search_investment(self):
 
         TABLE_ROW_LIMIT = 10
-        data_for_table = 0
-        if True:
+
+        if self.data_for_table_global.empty:
             db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
 
             data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
@@ -51,6 +51,8 @@ class Ui_Form(object):
                 self.tableWidget.setColumnHidden(5, True)
                 self.tableWidget.setColumnHidden(6, True)
                 self.tableWidget.setColumnHidden(7, True)
+        else:
+            data_for_table=self.data_for_table_global
 #========================================================
         string_for_search = self.searchLineEdit.text()
         column_for_search = self.tableWidget.currentColumn()
@@ -117,7 +119,7 @@ class Ui_Form(object):
     @Slot()
     def fill_investments_table(self):
         TABLE_ROW_LIMIT = 10
-        self.data_for_table_global = 0
+        self.data_for_table_global=pd.DataFrame()
         db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
 
         data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'

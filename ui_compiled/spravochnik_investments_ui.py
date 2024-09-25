@@ -10,7 +10,7 @@ import pandas as pd
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+    QSize, QTime, QUrl, Qt, Slot)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QFont, QFontDatabase, QGradient, QIcon,
                            QImage, QKeySequence, QLinearGradient, QPainter,
@@ -25,7 +25,61 @@ from settings import DB_PATH
 from ui_compiled import investment_add, investment_edit
 
 
+
 class Ui_Form(object):
+    data_for_table_global=0
+    def search_investment(self):
+
+        TABLE_ROW_LIMIT = 10
+        data_for_table = 0
+        if True:
+            db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
+
+            data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
+                                          f'investments.paper_pk,investments.customer_pk, investments.kotirovka, investments.buy_date,investments.sell_date '
+                                          f'FROM investments '
+                                          f'JOIN customers on customers.pk=investments.customer_pk '
+                                          f'JOIN papers on papers.pk=investments.paper_pk'), db_connection).astype(str)
+            self.tableWidget.setRowCount(len(data_for_table))
+            self.tableWidget.setColumnCount(len(data_for_table.columns))
+
+
+            hide_musor = True
+            if hide_musor:
+                self.tableWidget.setColumnHidden(3, True)
+                self.tableWidget.setColumnHidden(4, True)
+                self.tableWidget.setColumnHidden(5, True)
+                self.tableWidget.setColumnHidden(6, True)
+                self.tableWidget.setColumnHidden(7, True)
+#========================================================
+        string_for_search = self.searchLineEdit.text()
+        column_for_search = self.tableWidget.currentColumn()
+        print(f"string {string_for_search}, column {column_for_search}")
+        df = data_for_table
+
+        df=df[df[df.columns[column_for_search]] == string_for_search]
+
+        data_for_table=df
+
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setColumnCount(0)
+
+        self.tableWidget.setRowCount(len(data_for_table))
+        self.tableWidget.setColumnCount(len(data_for_table.columns))
+        hide_musor = True
+        if hide_musor:
+            self.tableWidget.setColumnHidden(3, True)
+            self.tableWidget.setColumnHidden(4, True)
+            self.tableWidget.setColumnHidden(5, True)
+            self.tableWidget.setColumnHidden(6, True)
+            self.tableWidget.setColumnHidden(7, True)
+
+        print(data_for_table)
+        self.data_for_table_global=data_for_table
+        for col_num in range(len(data_for_table.columns)):
+            for row_num in range(len(data_for_table)):
+                self.tableWidget.setItem(row_num, col_num,
+                                         QTableWidgetItem(data_for_table.iloc[row_num, col_num]))
 
     def delete_investment(self):
         VetDbConnnection = QSqlDatabase.addDatabase("QSQLITE")
@@ -59,8 +113,11 @@ class Ui_Form(object):
                               self.tableWidget.item(self.tableWidget.currentRow(),0).text(),)
         self.ui.setupUi(self.window)
         self.window.show()
+
+    @Slot()
     def fill_investments_table(self):
         TABLE_ROW_LIMIT = 10
+        self.data_for_table_global = 0
         db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
 
         data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
@@ -77,7 +134,7 @@ class Ui_Form(object):
             self.tableWidget.setColumnHidden(5,True)
             self.tableWidget.setColumnHidden(6,True)
             self.tableWidget.setColumnHidden(7,True)
-        print(data_for_table,len(data_for_table),(len(data_for_table.columns)))
+        #print(data_for_table,len(data_for_table),(len(data_for_table.columns)))
         for col_num in range(len(data_for_table.columns)):
             for row_num in range(len(data_for_table)):
                 self.tableWidget.setItem(row_num, col_num,
@@ -88,7 +145,7 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(724, 507)
-        self.addPushButton = QPushButton(Form, clicked = lambda :self.open_investments_add())
+        self.addPushButton = QPushButton(Form, clicked = lambda:self.open_investments_add())
         self.addPushButton.setObjectName(u"addPushButton")
         self.addPushButton.setGeometry(QRect(40, 420, 111, 61))
         self.tableWidget = QTableWidget(Form)
@@ -100,7 +157,7 @@ class Ui_Form(object):
         self.deletePushButton = QPushButton(Form, clicked = lambda:self.delete_investment())
         self.deletePushButton.setObjectName(u"deletePushButton")
         self.deletePushButton.setGeometry(QRect(580, 420, 111, 61))
-        self.searchPushButton = QPushButton(Form)
+        self.searchPushButton = QPushButton(Form, clicked = lambda:self.search_investment())
         self.searchPushButton.setObjectName(u"searchPushButton")
         self.searchPushButton.setGeometry(QRect(310, 60, 111, 31))
         self.label = QLabel(Form)
@@ -117,8 +174,8 @@ class Ui_Form(object):
 
         self.fill_investments_table()
 
-        shortcut = QShortcut(QKeySequence("Ctrl+R"), Form)
-        shortcut.activated.connect(self.fill_investments_table())
+        self.shortcut = QShortcut(QKeySequence("Ctrl+R"), Form)
+        self.shortcut.activated.connect(lambda: self.fill_investments_table())
 
         QMetaObject.connectSlotsByName(Form)
     # setupUi

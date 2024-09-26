@@ -30,6 +30,7 @@ from sqlalchemy import create_engine, text
 
 from settings import DB_PATH, SAVE_DIR, EXCEL_TEMPLATE_PATH, MAIN_REPORT_PAGE
 from time import time, sleep
+from openpyxl.styles import Border, Side
 
 class Ui_Form(object):
     def create_report(self):
@@ -41,14 +42,6 @@ class Ui_Form(object):
 
 
         # ----------------------------------------------------------------------------------дефолтные прелбразования данныхз ради некривого форматирования--------------------------------------------------------------------------------------------------------------------------
-        # report_entries.insert(0, 'position', report_entries['owner'].astype('category').cat.codes + 1)
-        # report_entries = report_entries.sort_values('owner')
-        # report_entries.loc[
-        #     report_entries[['owner']].duplicated(keep='first'), ['owner', 'address', 'name', 'position']] = ''
-        # report_entries['address'] = report_entries.apply(
-        #     lambda x: f"{x['name']}, {x['address']}" if x['address'] else "", axis=1)
-        # report_entries = report_entries.drop(columns='name')
-        # print(report_entries)
 
         # ----------------------------------------------------------------------------------создаем диреткории если нет и копируем шаблон, затем заполняем его--------------------------------------------------------------------------------------------------------------------------
         os.makedirs(SAVE_DIR, exist_ok=True)
@@ -69,6 +62,19 @@ class Ui_Form(object):
         }
 
         page = current_report.sheets[MAIN_REPORT_PAGE]
+        print(df.columns)
+        df_widght=len(df.columns)
+        df_height =len(df)
+
+        thin = Side(border_style="thin", color="000000")
+        thick = Side(border_style="thick", color="000000")
+
+        for i in range(df_height):
+            for j in range(df_widght):
+                page.cell(i+df_widght,j+df_height).border=Border(left=thick, right=thick, top=thick, bottom=thick)
+                page.cell(i+df_widght,j+df_height).value=df.iloc[i][j]
+
+
         message = QMessageBox()
         message.setText("loh")
         message.show()
@@ -82,6 +88,7 @@ class Ui_Form(object):
         for row in range(1, page.max_row + 1):
             for col in range(1, page.max_column + 1):
                 fill_placeholders(names, page.cell(row, col))
+
 
 
         current_report.close()

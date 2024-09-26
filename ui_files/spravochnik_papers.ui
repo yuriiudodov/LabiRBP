@@ -103,6 +103,19 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="reportPushButton">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>420</y>
+     <width>111</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Отчёт эксель</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

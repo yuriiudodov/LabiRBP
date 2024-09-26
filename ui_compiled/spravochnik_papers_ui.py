@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
+import shutil
+from asyncio import sleep
+import datetime
+
 import pandas as pd
 ################################################################################
 ## Form generated from reading UI file 'spravochnik_papers.ui'
@@ -15,15 +20,74 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtSql import QSqlDatabase
 from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QLineEdit,
-    QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
-    QWidget)
+                               QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
+                               QWidget, QMessageBox)
+from openpyxl.reader.excel import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 from sqlalchemy import create_engine, text
 
-from settings import DB_PATH
-
+from settings import DB_PATH, SAVE_DIR, EXCEL_TEMPLATE_PATH, MAIN_REPORT_PAGE
+from time import time, sleep
 
 class Ui_Form(object):
+    def create_report(self):
+        print("SHIT STARTED")
+
+        db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
+        df = pd.read_sql(text(f'SELECT * FROM papers'), db_connection).astype(str)
+
+
+
+        # ----------------------------------------------------------------------------------дефолтные прелбразования данныхз ради некривого форматирования--------------------------------------------------------------------------------------------------------------------------
+        # report_entries.insert(0, 'position', report_entries['owner'].astype('category').cat.codes + 1)
+        # report_entries = report_entries.sort_values('owner')
+        # report_entries.loc[
+        #     report_entries[['owner']].duplicated(keep='first'), ['owner', 'address', 'name', 'position']] = ''
+        # report_entries['address'] = report_entries.apply(
+        #     lambda x: f"{x['name']}, {x['address']}" if x['address'] else "", axis=1)
+        # report_entries = report_entries.drop(columns='name')
+        # print(report_entries)
+
+        # ----------------------------------------------------------------------------------создаем диреткории если нет и копируем шаблон, затем заполняем его--------------------------------------------------------------------------------------------------------------------------
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        filename = os.path.join(SAVE_DIR, f'Платёжный чернослав{int(time())}.xlsx')
+        shutil.copy(EXCEL_TEMPLATE_PATH, filename)
+        current_report = pd.ExcelWriter(filename, engine='openpyxl', mode='a')
+
+        # заполнение данными
+        # with open(NAMES_TXT_PATH, 'r', encoding='utf-8') as names_file:
+        #     names = [line.strip() for line in names_file.readlines()]
+        #self.employee_data = settings.get_employee_data(self.worker_pk)
+        #self.employee_data = self.employee_data.replace("  ", "", regex=True)
+        names = {
+
+            'DATE':str(datetime.date.today().isoformat())
+
+
+        }
+
+        page = current_report.sheets[MAIN_REPORT_PAGE]
+        message = QMessageBox()
+        message.setText("loh")
+        message.show()
+        sleep(1.5)
+
+        def fill_placeholders(names, cell):
+            if isinstance(cell.value, str):
+                for placeholder, name in names.items():
+                    cell.value = cell.value.replace(placeholder, name)
+
+        for row in range(1, page.max_row + 1):
+            for col in range(1, page.max_column + 1):
+                fill_placeholders(names, page.cell(row, col))
+
+
+        current_report.close()
+
+
+
     def fill_papers_table(self):
         TABLE_ROW_LIMIT = 10
         db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
@@ -64,6 +128,10 @@ class Ui_Form(object):
         self.searchLineEdit = QLineEdit(Form)
         self.searchLineEdit.setObjectName(u"searchLineEdit")
         self.searchLineEdit.setGeometry(QRect(40, 70, 251, 21))
+
+        self.reportPushButton = QPushButton(Form, clicked = lambda:self.create_report() )
+        self.reportPushButton.setObjectName(u"reportPushButton")
+        self.reportPushButton.setGeometry(QRect(310, 420, 111, 61))
 
         self.fill_papers_table()
 

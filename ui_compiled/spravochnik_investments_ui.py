@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import time
+
 import pandas as pd
 ################################################################################
 ## Form generated from reading UI file 'spravochnik_investments.ui'
@@ -122,14 +124,50 @@ class Ui_Form(object):
 
         # i am not sure how you are getting your data, but you said it is a
         # pandas data frame
-        db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
+        if self.data_for_table_global.empty:
+            db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
 
-        df = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
-                                          f'investments.paper_pk,investments.customer_pk, investments.kotirovka, investments.buy_date,investments.sell_date '
-                                          f'FROM investments '
-                                          f'JOIN customers on customers.pk=investments.customer_pk '
-                                          f'JOIN papers on papers.pk=investments.paper_pk'), db_connection).astype(str)
+            data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
+                                              f'investments.paper_pk,investments.customer_pk, investments.kotirovka, investments.buy_date,investments.sell_date '
+                                              f'FROM investments '
+                                              f'JOIN customers on customers.pk=investments.customer_pk '
+                                              f'JOIN papers on papers.pk=investments.paper_pk'), db_connection).astype(
+                str)
+            self.tableWidget.setRowCount(len(data_for_table))
+            self.tableWidget.setColumnCount(len(data_for_table.columns))
 
+            hide_musor = True
+            if hide_musor:
+                self.tableWidget.setColumnHidden(3, True)
+                self.tableWidget.setColumnHidden(4, True)
+                self.tableWidget.setColumnHidden(5, True)
+                self.tableWidget.setColumnHidden(6, True)
+                self.tableWidget.setColumnHidden(7, True)
+        else:
+            data_for_table = self.data_for_table_global
+        # ========================================================        if self.data_for_table_global.empty:
+        #             db_connection = create_engine(f'sqlite:///{DB_PATH}').connect()
+        #
+        #             data_for_table = pd.read_sql(text(f'SELECT investments.pk, customers.name, papers.info,'
+        #                                           f'investments.paper_pk,investments.customer_pk, investments.kotirovka, investments.buy_date,investments.sell_date '
+        #                                           f'FROM investments '
+        #                                           f'JOIN customers on customers.pk=investments.customer_pk '
+        #                                           f'JOIN papers on papers.pk=investments.paper_pk'), db_connection).astype(str)
+        #             self.tableWidget.setRowCount(len(data_for_table))
+        #             self.tableWidget.setColumnCount(len(data_for_table.columns))
+        #
+        #
+        #             hide_musor = True
+        #             if hide_musor:
+        #                 self.tableWidget.setColumnHidden(3, True)
+        #                 self.tableWidget.setColumnHidden(4, True)
+        #                 self.tableWidget.setColumnHidden(5, True)
+        #                 self.tableWidget.setColumnHidden(6, True)
+        #                 self.tableWidget.setColumnHidden(7, True)
+        #         else:
+        #             data_for_table=self.data_for_table_global
+        # #========================================================
+        df=data_for_table
         # open an existing document
         doc = docx.Document()
         doc.save('test.docx')
@@ -150,7 +188,7 @@ class Ui_Form(object):
                 t.cell(i + 1, j).text = str(df.values[i, j])
 
         # save the doc
-        doc.save('C:/MHAD/your_doc_name11.docx')
+        doc.save(f'C:/MHAD/Отчёт о скуфах{int(time())}.docx')
     @Slot()
     def fill_investments_table(self):
         TABLE_ROW_LIMIT = 10

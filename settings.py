@@ -1,5 +1,8 @@
 
 DB_PATH                 = 'databaserbp'
+SAVE_DIR ="C:\MHAD"
+EXCEL_TEMPLATE_PATH = "C:/MHAD/shablon.xlsx"
+MAIN_REPORT_PAGE        = 'Sheet1'
 def date_format_from(date):
     year = date[0]
     month = date[1]

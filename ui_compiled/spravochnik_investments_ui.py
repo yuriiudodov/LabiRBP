@@ -25,6 +25,7 @@ from sqlalchemy import create_engine, text
 
 from settings import DB_PATH
 from ui_compiled import investment_add, investment_edit
+from time import time
 import docx
 
 
@@ -267,5 +268,6 @@ class Ui_Form(object):
         self.deletePushButton.setText(QCoreApplication.translate("Form", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c", None))
         self.searchPushButton.setText(QCoreApplication.translate("Form", u"\u0438\u0441\u043a\u0430\u0442\u044c", None))
         self.label.setText(QCoreApplication.translate("Form", u"\u0421\u043f\u0440\u0430\u0432\u043e\u0447\u043d\u0438\u043a \u0418\u043d\u0432\u0435\u0441\u0442\u0438\u0446\u0438\u0439", None))
+        self.documentPushButton.setText("Документ")
     # retranslateUi
 

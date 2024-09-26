@@ -148,6 +148,7 @@ class Ui_Form(object):
     # setupUi
 
     def retranslateUi(self, Form):
+        self.reportPushButton.setText("Документ эксель")
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.addPushButton.setText(QCoreApplication.translate("Form", u"\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c", None))
         self.editPushButton.setText(QCoreApplication.translate("Form", u"\u0440\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c", None))

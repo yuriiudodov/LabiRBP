@@ -18,8 +18,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QMainWindow,
                                QMenuBar, QPushButton, QSizePolicy, QStatusBar,
                                QWidget, QDialog)
-from ui_compiled import spravochnik_choose_ui
+from ui_compiled import spravochnik_choose_ui, graph_builder_ui
+
+
 class Ui_MainWindow(object):
+    def open_graphic_builder(self):
+        self.window = QDialog()
+        self.ui = graph_builder_ui.Ui_Form()
+        self.ui.setupUi(self.window)
+        self.window.show()
     def open_spravochniki_choose(self):  # opens hyety nesysvetnyu
         self.window = QDialog()
         self.ui = spravochnik_choose_ui.Ui_Form()
@@ -51,7 +58,7 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.label, 0, 0, 1, 2)
 
-        self.upperPushButton = QPushButton(self.centralwidget)
+        self.upperPushButton = QPushButton(self.centralwidget,clicked = lambda:self.open_graphic_builder())
         self.upperPushButton.setObjectName(u"upperPushButton")
 
         self.gridLayout.addWidget(self.upperPushButton, 1, 1, 1, 1)
@@ -75,6 +82,6 @@ class Ui_MainWindow(object):
         self.middlePushButton.setText("Справочники")
         self.lowerPushButton.setText(QCoreApplication.translate("MainWindow", u"\u043b\u0430\u0431\u0430 1488", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"\u0413\u043b\u0430\u0432\u043d\u043e\u0435 \u043c\u0435\u043d\u044e", None))
-        self.upperPushButton.setText(QCoreApplication.translate("MainWindow", u"\u043b\u0430\u0431\u0430 1", None))
+        self.upperPushButton.setText("Построить график")
     # retranslateUi
 
